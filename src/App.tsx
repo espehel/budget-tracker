@@ -1,21 +1,29 @@
-import React, { ChangeEvent, FC } from "react";
-import { TextItem, TextMarkedContent } from "pdfjs-dist/types/src/display/api";
+import React, { ChangeEvent, FC, useState } from "react";
 import { readPdf } from "./utils/pdf-reader";
+import { parseTrumfVisa, TrumfTransaction } from "./utils/trumf-visa-parser";
 
 const App: FC = () => {
+  const [transactions, setTransactions] = useState<Array<TrumfTransaction>>([]);
   const handleFileOnChange = async (event: ChangeEvent<HTMLInputElement>) => {
-    console.log("file selected");
     const file = event.target.files?.item(0);
     if (file) {
       const content = await readPdf(file);
-      console.log(content);
+      setTransactions(parseTrumfVisa(content));
     }
   };
 
   return (
     <main>
-      <h1>Hello World</h1>
+      <h1>Budget Tracker</h1>
       <input type="file" onChange={handleFileOnChange} />
+      <article>
+        <h2>Transactions</h2>
+        <ul>
+          {transactions.map((trx) => (
+            <li>{`${trx.description} - ${trx.amountNOK}`}</li>
+          ))}
+        </ul>
+      </article>
     </main>
   );
 };
